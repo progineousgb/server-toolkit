@@ -1,0 +1,10 @@
+*.swp
+*~
+.DS_Store
+*.log
+*.tar.gz
+*.sql
+*.xml
+*.zip
+*.gz
+.env
