@@ -2,7 +2,7 @@
 
 # Pro Gineous Server Toolkit
 
-Small, readable scripts for the jobs that come up again and again on a server: locking down a fresh VPS, checking what is listening, watching domain expiry, reading DMARC reports, fixing WP-Cron and backing up WordPress. Each script comes from a walkthrough on the [Pro Gineous blog](https://blog.progineous.com), so the article explains the why and the script handles the typing.
+Small, readable scripts for the jobs that come up again and again on a server: locking down a fresh VPS, checking what is listening, finding what filled the disk, watching domain expiry, reading DMARC reports, fixing WP-Cron and backing up WordPress. Each script comes from a walkthrough on the [Pro Gineous blog](https://blog.progineous.com), so the article explains the why and the script handles the typing.
 
 Everything is plain Bash, has a `--help` flag, and is read-only unless you pass an option that changes something. Even then it asks first.
 
@@ -17,6 +17,7 @@ Everything is plain Bash, has a `--help` flag, and is read-only unless you pass 
 | [dns/dns-compare.sh](dns/dns-compare.sh) | Asks each authoritative nameserver and two public resolvers for the same record and shows where they disagree. | [How to Read dig Output When DNS Looks Wrong](https://blog.progineous.com/read-dig-output-dns/) |
 | [email/mail-auth-check.sh](email/mail-auth-check.sh) | Shows DMARC, SPF and DKIM records with a few sanity checks (one SPF record, DMARC policy, rua address). | [How to Read DMARC Reports Before You Move to p=reject](https://blog.progineous.com/read-dmarc-reports/) |
 | [email/dmarc-report-summary.sh](email/dmarc-report-summary.sh) | Turns DMARC aggregate reports (.zip, .xml.gz, .xml) into one line per sending IP, sorted by volume. | [How to Read DMARC Reports Before You Move to p=reject](https://blog.progineous.com/read-dmarc-reports/) |
+| [disk/disk-usage-report.sh](disk/disk-usage-report.sh) | Shows what is filling a disk: df space and inodes, biggest directories and files, journald, apt cache, Docker and deleted files still held open. Read-only, prints cleanup suggestions only. | [Disk Full on a Linux VPS? How to Find What Is Using the Space](https://blog.progineous.com/vps-disk-full/) |
 | [wordpress/wp-cron-check.sh](wordpress/wp-cron-check.sh) | Diagnoses missed scheduled posts with WP-CLI and can switch WP-Cron to a real cron job. | [Why WordPress Missed Your Scheduled Post](https://blog.progineous.com/wordpress-missed-schedule-wp-cron/) |
 | [backups/wp-backup.sh](backups/wp-backup.sh) | Files plus database dump in one archive, disk-space check, retention with confirmation before deleting. | [How to Back Up WordPress: Files and Database](https://blog.progineous.com/how-to-back-up-wordpress/) |
 
