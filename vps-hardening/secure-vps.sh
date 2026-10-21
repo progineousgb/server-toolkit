@@ -38,6 +38,10 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# apt and dpkg never stop to ask; changed config files keep the local version.
+export DEBIAN_FRONTEND=noninteractive
+APT_OPTS=(-y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold)
+
 run() { if (( DRY )); then printf '[dry-run] %s\n' "$*"; else "$@"; fi; }
 confirm() {
   (( ASSUME_YES )) && return 0
@@ -49,11 +53,12 @@ if (( ! DRY )) && [[ $EUID -ne 0 ]]; then echo "Run as root (sudo), or use --dry
 command -v apt-get >/dev/null || { echo "This script expects Debian/Ubuntu (apt)." >&2; exit 1; }
 
 if confirm "1/8 Update and upgrade packages?"; then
-  run apt-get update && run apt-get upgrade -y
+  run apt-get update && run apt-get "${APT_OPTS[@]}" upgrade
 fi
 
 if confirm "2/8 Create sudo user '$USER_NAME'?"; then
   if id "$USER_NAME" >/dev/null 2>&1; then echo "User $USER_NAME already exists, skipping."
+  elif (( ASSUME_YES )); then run adduser --disabled-password --gecos "" "$USER_NAME"
   else run adduser "$USER_NAME"; fi
   run usermod -aG sudo "$USER_NAME"
   echo "From your own machine run: ssh-copy-id $USER_NAME@YOUR_SERVER_IP"
@@ -76,7 +81,7 @@ else
 fi
 
 if confirm "4/8 Configure UFW (deny incoming; allow OpenSSH, 80/tcp, 443/tcp) and enable it?"; then
-  command -v ufw >/dev/null || run apt-get install -y ufw
+  command -v ufw >/dev/null || run apt-get "${APT_OPTS[@]}" install ufw
   run ufw default deny incoming
   run ufw default allow outgoing
   run ufw allow OpenSSH
@@ -87,8 +92,11 @@ if confirm "4/8 Configure UFW (deny incoming; allow OpenSSH, 80/tcp, 443/tcp) an
 fi
 
 if confirm "5/8 Install and enable fail2ban with the sshd jail?"; then
-  run apt-get install -y fail2ban
-  if (( DRY )); then echo "[dry-run] write /etc/fail2ban/jail.d/sshd.local"
+  run apt-get "${APT_OPTS[@]}" install fail2ban
+  # Keep any jail config the admin already wrote.
+  if [[ -e /etc/fail2ban/jail.local || -e /etc/fail2ban/jail.d/sshd.local ]]; then
+    echo "Existing /etc/fail2ban/jail.local or jail.d/sshd.local found, leaving it unchanged."
+  elif (( DRY )); then echo "[dry-run] write /etc/fail2ban/jail.d/sshd.local"
   else printf '[sshd]\nenabled = true\n' > /etc/fail2ban/jail.d/sshd.local; fi
   run systemctl enable --now fail2ban
   run systemctl restart fail2ban
@@ -96,8 +104,8 @@ if confirm "5/8 Install and enable fail2ban with the sshd jail?"; then
 fi
 
 if confirm "6/8 Install unattended-upgrades?"; then
-  run apt-get install -y unattended-upgrades
-  run dpkg-reconfigure -plow unattended-upgrades
+  run apt-get "${APT_OPTS[@]}" install unattended-upgrades
+  run dpkg-reconfigure -f noninteractive -plow unattended-upgrades
   run systemctl status unattended-upgrades --no-pager || true
 fi
 

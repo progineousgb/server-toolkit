@@ -10,7 +10,7 @@ Everything is plain Bash, has a `--help` flag, and is read-only unless you pass 
 
 | Tool | What it does | Related article |
 |------|--------------|-----------------|
-| [vps-hardening/secure-vps.sh](vps-hardening/secure-vps.sh) | Step-by-step hardening for Debian/Ubuntu: updates, sudo user, SSH key-only login, UFW, fail2ban, unattended-upgrades, optional swap. Supports `--dry-run`. | [Secure a Linux VPS in 15 Minutes](https://blog.progineous.com/secure-linux-vps-15-minutes/) |
+| [vps-hardening/secure-vps.sh](vps-hardening/secure-vps.sh) | Step-by-step hardening for Debian/Ubuntu: updates, sudo user, SSH key-only login, UFW, fail2ban, unattended-upgrades, optional swap. Supports `--dry-run` and an unattended `--yes` run. An existing fail2ban `jail.local` or `jail.d/sshd.local` is left unchanged. | [Secure a Linux VPS in 15 Minutes](https://blog.progineous.com/secure-linux-vps-15-minutes/) |
 | [vps-hardening/port-audit.sh](vps-hardening/port-audit.sh) | Lists listening sockets and flags database/admin ports bound to a public address. Read-only. | [How to Secure a VPS: Keys, Ports and Updates](https://blog.progineous.com/how-to-secure-a-vps/) |
 | [domains/domain-expiry.sh](domains/domain-expiry.sh) | Checks a list of domains over RDAP for expiry dates and hold/redemption/pending-delete flags. Cron friendly. | [Using RDAP to Check a Domain's Expiry Date and Lock Status](https://blog.progineous.com/rdap-domain-lookup/) |
 | [domains/rdap-lookup.sh](domains/rdap-lookup.sh) | Short RDAP summary for one domain: status, lock, dates, nameservers, DNSSEC. | [Using RDAP to Check a Domain's Expiry Date and Lock Status](https://blog.progineous.com/rdap-domain-lookup/) |
@@ -38,6 +38,8 @@ sudo apt install curl jq dnsutils xmlstarlet unzip
 ```
 
 ## Where to run it
+
+Linux only. The scripts need bash and target Linux servers; they do not run on macOS or Windows. From those systems, copy them to the server and run them there over SSH.
 
 The scripts target current Debian and Ubuntu releases and work on any VPS or dedicated server with root access. The team tests them on [Pro Gineous](https://progineous.com) VPS plans (from $6.96/mo), which are a cheap place to spin up a scratch server and try the hardening script before touching anything that matters.
 
