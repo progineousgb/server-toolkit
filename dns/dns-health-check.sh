@@ -34,6 +34,9 @@ have_jq=0; command -v jq >/dev/null && have_jq=1
 # Resolver. Try dig first; if it times out, is not installed or looks
 # intercepted, switch to DoH for the rest of the run. Output is one record per line, like dig +short.
 use_doh=0
+# q() runs inside $(...), so a switch to DoH made there would be lost.
+# Remember it in a file instead.
+doh_flag=$(mktemp); trap 'rm -f "$doh_flag"' EXIT
 command -v dig >/dev/null || use_doh=1
 # Some networks answer every query themselves: fake A records in 198.18.0.0/15
 # and empty answers for the rest. The root zone always has an SOA, so an empty
@@ -58,13 +61,14 @@ doh() {
 
 q() {
   local out
+  [[ -s $doh_flag ]] && use_doh=1
   if (( ! use_doh )); then
     if out=$(dig +time=2 +tries=1 +noall +answer +comments "$1" "$2" 2>/dev/null) \
        && grep -q 'status:' <<<"$out"; then
       awk -v t="$1" '!/^;/ && NF >= 5 && $4 == t { $1=$2=$3=$4=""; sub(/^ +/, ""); print }' <<<"$out"
       return 0
     fi
-    use_doh=1
+    use_doh=1; echo 1 > "$doh_flag"
   fi
   doh "$1" "$2" || { echo "DNS lookup failed for $2 $1 (dig and DoH)" >&2; return 1; }
 }
@@ -184,7 +188,7 @@ v=$(q CAA "$d" | sed 's/"//g' || true)
 if [[ -n $v ]]; then add INFO caa "$(paste -sd';' - <<<"$v" | sed 's/;/; /g')"; else add INFO caa "not published, any CA may issue"; fi
 
 # Output
-via=dig; (( use_doh )) && via=doh
+via=dig; [[ -s $doh_flag ]] && use_doh=1; (( use_doh )) && via=doh
 if (( json )); then
   if (( have_jq )); then
     printf '%s\n' "${results[@]}" | jq -Rn --arg d "$d" --arg via "$via" --argjson rc "$worst" \

@@ -29,7 +29,8 @@ while [[ -n $zone ]]; do
 done
 [[ -n $ns ]] || { echo "Could not find NS records for $name" >&2; exit 1; }
 
-X
+# One sorted, single-line answer so servers can be compared as strings.
+answer() { dig +short +time=3 +tries=1 "$@" "$name" "$type" 2>/dev/null | sort | paste -sd" " - || true; }
 
 echo "Zone: $zone   Query: $name $type"
 declare -A seen=(); rc=0
