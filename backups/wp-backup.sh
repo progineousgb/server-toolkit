@@ -32,7 +32,7 @@ done
 command -v wp >/dev/null || { echo "WP-CLI (wp) not found." >&2; exit 2; }
 [[ -f $WP_PATH/wp-config.php ]] || { echo "No wp-config.php in $WP_PATH" >&2; exit 1; }
 case "$(realpath "$DEST" 2>/dev/null || echo "$DEST")" in
-  "$(realpath "$WP_PATH")"*) echo "DEST must not be inside the WordPress folder." >&2; exit 1 ;;
+  "$(realpath "$WP_PATH")"|"$(realpath "$WP_PATH")"/*) echo "DEST must not be inside the WordPress folder." >&2; exit 1 ;;
 esac
 
 umask 077   # archives contain wp-config.php and the database
