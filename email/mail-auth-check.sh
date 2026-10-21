@@ -39,10 +39,12 @@ if (( n == 0 )); then echo "MISSING: no SPF record"; rc=1
 elif (( n > 1 )); then echo "PROBLEM: $n SPF records (receivers expect exactly one)"; echo "$spf"; rc=1
 else
   echo "$spf"
-  case "$spf" in
-    *"?all"*) echo "NOTE: ends in ?all (neutral)";;
-    *"~all"*) echo "NOTE: ends in ~all (softfail)";;
-    *"-all"*) echo "ends in -all (hard fail for unlisted senders)";;
+  case "${spf,,}" in
+    *" ?all") echo "NOTE: ends in ?all (neutral)";;
+    *" ~all") echo "NOTE: ends in ~all (softfail)";;
+    *" -all") echo "ends in -all (hard fail for unlisted senders)";;
+    *" +all"|*" all") echo "PROBLEM: ends in +all, any server may send as $d"; rc=1;;
+    *) echo "NOTE: no all mechanism at the end";;
   esac
 fi
 
